@@ -485,3 +485,22 @@ for(var k=0; k<5; k++) {
 
 }
 
+// Logistic Regression
+// Betas/weights from analysis in R
+//Code from Yu et al (2020), except for weight values
+var pondClassified_LR = waterShaped.map(function(f) {
+  var w0 = 14.29448;
+  var w1 = -0.8817573;
+  var w2 = -1.004508;
+  var w3 = 1.355185;
+  var w4 = -13.68332;
+  var w5 = -4.764063;
+  var ipq = ee.Number(f.get('ipq')).multiply(w1)
+  var soli = ee.Number(f.get('soli')).multiply(w2)
+  var pfd = ee.Number(f.get('pfd')).multiply(w3)
+  var conv = ee.Number(f.get('conv')).multiply(w4)
+  var sqp = ee.Number(f.get('sqp')).multiply(w5)
+  var weighted_sum = ipq.add(soli).add(pfd).add(conv).add(sqp).add(w0)
+  var res = ee.Algorithms.If(weighted_sum.gte(0), 1, 0)
+  return f.set('result', res);
+}).filterMetadata('result', 'equals', 1);
